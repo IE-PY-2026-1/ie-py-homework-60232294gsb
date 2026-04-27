@@ -20,7 +20,7 @@ for i in range(len(Labels)):
 print()
 print()
 
-# protudc_data와 Labels의 입력값 개수 비교를 통해 진단 수행 여부 결정
+# protudct_data와 Labels의 입력값 개수 비교를 통해 진단 수행 여부 결정
 # input 내용 정수화, 실수화 및 변수 선언
 
 if len(product_data) == len(Labels):
