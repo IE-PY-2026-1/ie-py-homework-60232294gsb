@@ -57,11 +57,11 @@ def insert_information():
             if i == 0:
                 product_name_data.append(info)
             elif i == 1:
-                product_stock_data.append(float(info))
+                product_stock_data.append(int(info))
             elif i == 2:
-                product_sales_data.append(float(info))
+                product_sales_data.append(int(info))
             elif i == 3:
-                product_cost_data.append(float(info))
+                product_cost_data.append(int(info))
             elif i == 4:
                 product_margin_rate.append(float(info))
             
@@ -152,28 +152,30 @@ def view_final_report():
     총 재고 수량 : {sum(product_remaining_data)}개
     총 자산 가치 : {sum(product_total_value)}
     최고가 제품 : {max(product_cost_data)}원
-    최저가 제품 : {min(product_cost_data)}원
-    품절 임박 제품(S등급) : {",".join(product_low_stock)}
-    파이썬 스마트 물류 시스템을 종료합니다.
-    """)
+    최저가 제품 : {min(product_cost_data)}원""")
+    if len(product_low_stock) == 0:
+        print("""품절 임박 제품(S등급)이 없습니다.""")
+    else:
+        print(f"""품절 임박 제품(S등급) : {",".join(product_low_stock)}""")
+    print("""파이썬 스마트 물류 시스템을 종료합니다.""")
 
 #메인 실행 루프
 while True :
     start_system()
-    choice = int(input("메뉴를 입력하세요 : "))
+    choice = int(input("선택한 메뉴의 번호만 입력해주세요.(예시 : 1 / 2/ 3 ) : "))
 
     if choice == 1 :
         insert_information()
         calculating_information()
     
-    elif choice == 2:
+    elif choice == 2 :
         if things_count == 0:
             print("어떠한 정보도 기입하지 않았습니다. 정보를 입력한 후 선택해주세요.")
             continue
         idx_product = list_of_products()
         midterm_inspection(idx_product)
     
-    elif choice == 3:
+    elif choice == 3 :
         if things_count == 0:
             print("어떠한 정보도 기입하지 않았습니다. 정보를 입력한 후 선택해주세요.")
             continue
