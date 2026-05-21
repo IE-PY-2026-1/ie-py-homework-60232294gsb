@@ -1,29 +1,79 @@
 # 파일이름 : 파이썬 스마트 물류 센터
 # 작 성 자 : 60232294 신지웅
-print("파이썬 스마트 물류 센터에 오신 것을 환영합니다!")
 
+things_count = 0
 Labels = [['제품명', '문자열'], ['기초 재고량', '정수, 단위 : 개'], ['오늘 판매량', '정수, 단위 : 개'], ['제품 단가', '정수, 단위 : 원'], ['예상 마진율', '소수점(예 : 0.15)']]
 
-product_data = []
+product_data = [] #정보 입력 시 저장 리스트
+product_name_data = [] #상품명 저장 리스트
+product_stock_data = [] #입고량 저장 리스트
+product_sales_data = [] #판매량 저장 리스트
+product_cost_data = [] #단가 저장 리스트
+product_margin_rate = [] #마진율 저장 리스트
+product_risk_score = [] #상품별 긴급 발주 점수
+product_urgent_grade = [] #상품별 긴급 발주 등급 저장 리스트
+product_remaining_data = [] #상품별 잔여 재고 리스트
+product_total_value = [] #총 자산 가치
+product_status_msg = [] #제품별 상태 메시지
+product_low_stock = [] #S등급 상품 저장 리스트
 
-for i in range(len(Labels)):
-    info = input(f"{Labels[i][0]}({Labels[i][1]})을(를) 입력하세요 : ")
+
+
+
+#시스템 메뉴 출력 함수
+def start_system():
+    print("-"*30)
+    if things_count == 0:
+        print("파이썬 스마트 물류 센터에 오신 것을 환영합니다!")
+    else:
+        print("추가 제품 정보 입력을 시작합니다.")
+    print("-"*30)
+
+    print("""
+    1. 제품 정보 입력 및 계산하기
+    2. 제품 항목별 결과보기
+    3. 최종 결과 보기(종료)
+    """)
+
+#정보 입력 함수
+def insert_information():
+    global things_count, product_data
+    product_data = [] #정보 입력 시 리스트 초기화
+
+
+
+    for i in range(len(Labels)):
+        while True :
+            info = input(f"{Labels[i][0]}({Labels[i][1]})을(를) 입력하세요 : ")
     
-    if i > 0 :
-        if float(info) < 0 :
-            print(f"{Labels[i][0]}은 0 이상의 숫자여야 합니다.")
+            if i > 0 :
+                if not info.replace(".",'').replace("-",'').isdigit():
+                    print(f"{Labels[i][0]}은(는) 숫자만 입력해야 합니다. 다시 입력하세요.")
+                    continue
+                if float(info) < 0 :
+                    print(f"{Labels[i][0]}은(는) 0 이상의 숫자여야 합니다. 다시 입력하세요.")
+                    continue
+            
+            if i == 0:
+                product_name_data.append(info)
+            elif i == 1:
+                product_stock_data.append(float(info))
+            elif i == 2:
+                product_sales_data.append(float(info))
+            elif i == 3:
+                product_cost_data.append(float(info))
+            elif i == 4:
+                product_margin_rate.append(float(info))
+            
+            product_data.append(info)
             break
-    
-    product_data.append(info)
+
+    things_count += 1
 
 
-print()
-print()
 
-# product_data와 Labels의 입력값 개수 비교를 통해 진단 수행 여부 결정
-# input 내용 정수화, 실수화 및 변수 선언
-
-if len(product_data) == len(Labels):
+# 계산 함수
+def calculating_information():
     stock_quantity = int(product_data[1])
     daily_sales = int(product_data[2])
     unit_price = int(product_data[3])
@@ -32,7 +82,10 @@ if len(product_data) == len(Labels):
     #잔여 재고, 총 재고가치 계산
     remaining_stock = stock_quantity
     remaining_stock -= daily_sales
+    product_remaining_data.append(remaining_stock)
+
     total_value = remaining_stock * unit_price
+    product_total_value.append(total_value)
 
     #발주 시급성 계산 및 등급 판정
 
@@ -44,7 +97,7 @@ if len(product_data) == len(Labels):
     if risk_score >= 100 :
         urgent_grade = 'S'
         status_msg = "긴급 발주가 필요한 긴급 상황입니다!"
-    
+        product_low_stock.append(product_name_data[things_count - 1])   
     elif risk_score >= 60 :
         urgent_grade = 'A'
         status_msg = "재고 부족이 예상되니 발주를 준비하세요."
@@ -61,48 +114,69 @@ if len(product_data) == len(Labels):
         urgent_grade = 'F'
         status_msg = "재고가 매우 충분하여 관리가 불필요합니다. \n수요에 비해 공급이 너무 많은 것은 아닌지 고민해보세요!"
     
-    #등급 판정 결과 product_data 에 삽입
-    product_data.insert(5, urgent_grade)
+
+    product_risk_score.append(risk_score)
+    product_urgent_grade.append(urgent_grade)
+    product_status_msg.append(status_msg)
+
+
+# 제품 목록 선택 함수
+def list_of_products():
+    for i in range(len(product_name_data)):
+        print(f"{i+1}. {product_name_data[i]}")
     
-    #오늘 하루 물류 센터에서 발생한 가장 큰 규모의 트래픽(최대 취급 물량) 확인
-    max_compare = max(stock_quantity, daily_sales)
+    select_product = int(input("점검할 제품의 번호를 입력해주세요 : "))
+    return select_product
 
-    #제품 종합 정보 제공
-    print(f"제품명 : {product_data[0]}")
-    print(f"기초 재고량 : {stock_quantity:,} 개")
-    print(f"오늘 판매량 : {daily_sales:,} 개")
-    print(f"제품 단가 : {unit_price:,} 원")
-    print(f"예상 마진율 : {margin_rate}")
+#개별 점검 보고서 함수
+def midterm_inspection(midterm_choice):
+    idx = midterm_choice - 1
+    print(f"""
+    {idx+1}번 {product_name_data[idx]}를 선택하셨습니다.
+    제품명 : {product_name_data[idx]}
+    기초 재고량 : {product_stock_data[idx]}개
+    오늘 판매량 : {product_sales_data[idx]}개
+    제품 단가 : {product_cost_data[idx]}원
+    예상 마진율 : {product_margin_rate[idx]}
+    현재 재고량 : {product_remaining_data[idx]}개
+    발주 시급성 점수 : {product_risk_score[idx]:.2f}점
+    발주 시급성 등급 : {product_urgent_grade[idx]}
+    상태 메시지 : {product_status_msg[idx]}
+    """)
 
-    #물류 진단 리포트 제공
+#최종 보고서 함수
+def view_final_report():
+    print(f"""
+    [파이썬 스마트 물류 센터 최종 리포트]
+    입고된 제품 목록 {",".join(product_name_data)}
+    총 재고 수량 : {sum(product_remaining_data)}개
+    총 자산 가치 : {sum(product_total_value)}
+    최고가 제품 : {max(product_cost_data)}원
+    최저가 제품 : {min(product_cost_data)}원
+    품절 임박 제품(S등급) : {",".join(product_low_stock)}
+    파이썬 스마트 물류 시스템을 종료합니다.
+    """)
 
-    print()
+#메인 실행 루프
+while True :
+    start_system()
+    choice = int(input("메뉴를 입력하세요 : "))
+
+    if choice == 1 :
+        insert_information()
+        calculating_information()
     
-    print("-"*40)
-    print(f"{product_data[0]} 물류 진단 레포트")
-    print("-"*40)
-
-    print(f"현재 잔여 재고 : {remaining_stock:,} 개")
-    print(f"총 재고가치 : {total_value:,} 원")
-    print(f"일일 최대 취급 물량 : {max_compare:,} 개")
-    print(f"발주 위험 점수 : {risk_score:.2f} 점")
-    print(f"최종 발주 등급 : {urgent_grade}등급")
-    print(f"진단 결과 : {status_msg}")
-
-    print()
-
-    #골든타임 알림
-
-    if urgent_grade == 'S' and margin_rate >= 0.2:
-        print("[골든타임 알림]")
-        print("이 품목은 수익성이 높고 재고가 부족한 핵심 관리 대상입니다.")
-        print("발주 후 입고 시간을 고려해 최우선적으로 추가 주문을 진행해주세요!")
-
+    elif choice == 2:
+        if things_count == 0:
+            print("어떠한 정보도 기입하지 않았습니다. 정보를 입력한 후 선택해주세요.")
+            continue
+        idx_product = list_of_products()
+        midterm_inspection(idx_product)
     
-    #종료 알림
+    elif choice == 3:
+        if things_count == 0:
+            print("어떠한 정보도 기입하지 않았습니다. 정보를 입력한 후 선택해주세요.")
+            continue
+        view_final_report()
+        break
 
-    print("-"*40)
-    print("진단이 종료되었습니다. 파이썬 스마트 물류 센터를 이용해주셔서 감사합니다.")
-
-else:
-    print("데이터가 올바르게 입력되지 않아 진단을 수행하지 않고 종료합니다.")
