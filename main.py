@@ -26,7 +26,7 @@ def start_system():
     if things_count == 0:
         print("파이썬 스마트 물류 센터에 오신 것을 환영합니다!")
     else:
-        print("추가 제품 정보 입력을 시작합니다.")
+        print("필요한 기능의 번호를 입력해주세요.")
     print("-"*30)
 
     print("""
@@ -162,7 +162,7 @@ def view_final_report():
 #메인 실행 루프
 while True :
     start_system()
-    choice = int(input("선택한 메뉴의 번호만 입력해주세요.(예시 : 1 / 2/ 3 ) : "))
+    choice = int(input("선택한 메뉴의 번호만 입력해주세요.(예시 : 1 / 2 / 3 ) : "))
 
     if choice == 1 :
         insert_information()
