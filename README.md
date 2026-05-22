@@ -96,7 +96,7 @@
      * **해결:** 파이썬 문법 규칙상 global 키워드는 단독으로 변수 이름만 먼저 선언해야 바깥의 전역변수를 참조할 수 있다는 점을 학습함. 이에 따라 함수 초입에 global things_count와 같이 전역변수 사용을 먼저 선언한 후, 아랫줄에서 별도로 연산(things_count += 1)을 수행하도록 코드를 분리하여 오류를 해결함.
      
 ### **📁 증빙 자료:**
-  * [3차_AI협업캡처.pdf 첨부 완료] (첨부 후 링크)
+  * [3차_AI협업캡처.pdf 첨부 완료] ([첨부 후 링크](https://github.com/IE-PY-2026-1/ie-py-homework-60232294gsb/blob/main/3%EC%B0%A8_AI%ED%98%91%EC%97%85%20%EC%BA%A1%EC%B2%98.pdf))
   * [3차과제_실행결과.jpg] (깃허브 Codespace storage 용량 초과로 인한 Google Colab 활용하여 실행 결과 첨부)
 <br>
 
