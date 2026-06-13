@@ -3,21 +3,7 @@
 
 things_count = 0
 Labels = [['제품명', '문자열'], ['기초 재고량', '정수, 단위 : 개'], ['오늘 판매량', '정수, 단위 : 개'], ['제품 단가', '정수, 단위 : 원'], ['예상 마진율', '소수점(예 : 0.15)']]
-
-product_data = [] #정보 입력 시 저장 리스트
-product_name_data = [] #상품명 저장 리스트
-product_stock_data = [] #입고량 저장 리스트
-product_sales_data = [] #판매량 저장 리스트
-product_cost_data = [] #단가 저장 리스트
-product_margin_rate = [] #마진율 저장 리스트
-product_risk_score = [] #상품별 긴급 발주 점수
-product_urgent_grade = [] #상품별 긴급 발주 등급 저장 리스트
-product_remaining_data = [] #상품별 잔여 재고 리스트
-product_total_value = [] #총 자산 가치
-product_status_msg = [] #제품별 상태 메시지
-product_low_stock = [] #S등급 상품 저장 리스트
-
-
+total_inventory_data= [] 
 
 
 #시스템 메뉴 출력 함수
@@ -36,58 +22,40 @@ def start_system():
     """)
 
 #정보 입력 함수
-def insert_information():
-    global things_count, product_data
-    product_data = [] #정보 입력 시 리스트 초기화
+def insert_and_calculate_information():
+    global things_count
 
+    temp_data = [] #임시 데이터 리스트
 
 
     for i in range(len(Labels)):
         while True :
-            info = input(f"{Labels[i][0]}({Labels[i][1]})을(를) 입력하세요 : ")
+            try:
+                info = input(f"{Labels[i][0]}({Labels[i][1]})을(를) 입력하세요 : ")
+        
+                if i == 0:
+                    temp_data.append(info)
+                elif i == 4:
+                    temp_data.append(float(info))#마진율
+                else:
+                    if int(info) < 0 :
+                        print(f"{Labels[i][0]}은(는) 0 이상의 숫자여야 합니다. 다시 입력하세요.")
+                        continue
+                    temp_data.append(int(info))
+                break
+
+            except ValueError:
+                print("잘못된 입력입니다. 형식에 맞는 숫자를 입력해주세요.")
+
+    name = temp_data[0]
+    stock_quantity = temp_data[1]
+    daily_sales = temp_data[2]
+    unit_price = temp_data[3]
+    margin_rate = temp_data[4]
     
-            if i > 0 :
-                if not info.replace(".",'').replace("-",'').isdigit():
-                    print(f"{Labels[i][0]}은(는) 숫자만 입력해야 합니다. 다시 입력하세요.")
-                    continue
-                if float(info) < 0 :
-                    print(f"{Labels[i][0]}은(는) 0 이상의 숫자여야 합니다. 다시 입력하세요.")
-                    continue
-            
-            if i == 0:
-                product_name_data.append(info)
-            elif i == 1:
-                product_stock_data.append(int(info))
-            elif i == 2:
-                product_sales_data.append(int(info))
-            elif i == 3:
-                product_cost_data.append(int(info))
-            elif i == 4:
-                product_margin_rate.append(float(info))
-            
-            product_data.append(info)
-            break
-
-    things_count += 1
-
-
-
-# 계산 함수
-def calculating_information():
-    stock_quantity = int(product_data[1])
-    daily_sales = int(product_data[2])
-    unit_price = int(product_data[3])
-    margin_rate = float(product_data[4])
-
-    #잔여 재고, 총 재고가치 계산
-    remaining_stock = stock_quantity
-    remaining_stock -= daily_sales
-    product_remaining_data.append(remaining_stock)
-
+    remaining_stock = stock_quantity - daily_sales
     total_value = remaining_stock * unit_price
-    product_total_value.append(total_value)
 
-    #발주 시급성 계산 및 등급 판정
 
     if remaining_stock > 0:
         risk_score = (daily_sales * 10 / remaining_stock) * 30 + (margin_rate * 20)
@@ -96,8 +64,7 @@ def calculating_information():
     
     if risk_score >= 100 :
         urgent_grade = 'S'
-        status_msg = "긴급 발주가 필요한 긴급 상황입니다!"
-        product_low_stock.append(product_name_data[things_count - 1])   
+        status_msg = "긴급 발주가 필요한 긴급 상황입니다!"  
     elif risk_score >= 60 :
         urgent_grade = 'A'
         status_msg = "재고 부족이 예상되니 발주를 준비하세요."
@@ -115,70 +82,107 @@ def calculating_information():
         status_msg = "재고가 매우 충분하여 관리가 불필요합니다. \n수요에 비해 공급이 너무 많은 것은 아닌지 고민해보세요!"
     
 
-    product_risk_score.append(risk_score)
-    product_urgent_grade.append(urgent_grade)
-    product_status_msg.append(status_msg)
+    product_record = [name, stock_quantity, daily_sales, unit_price, margin_rate, remaining_stock, total_value, risk_score, urgent_grade, status_msg]
+    total_inventory_data.append(product_record)
+    things_count += 1
+    print(f"\n[{name}] 제품의 정보가 성공적으로 등록되었습니다!\n")
 
 
-# 제품 목록 선택 함수
-def list_of_products():
-    for i in range(len(product_name_data)):
-        print(f"{i+1}. {product_name_data[i]}")
-    
-    select_product = int(input("점검할 제품의 번호를 입력해주세요 : "))
-    return select_product
 
-#개별 점검 보고서 함수
-def midterm_inspection(midterm_choice):
-    idx = midterm_choice - 1
-    print(f"""
-    {idx+1}번 {product_name_data[idx]}를 선택하셨습니다.
-    제품명 : {product_name_data[idx]}
-    기초 재고량 : {product_stock_data[idx]}개
-    오늘 판매량 : {product_sales_data[idx]}개
-    제품 단가 : {product_cost_data[idx]}원
-    예상 마진율 : {product_margin_rate[idx]}
-    현재 재고량 : {product_remaining_data[idx]}개
-    발주 시급성 점수 : {product_risk_score[idx]:.2f}점
-    발주 시급성 등급 : {product_urgent_grade[idx]}
-    상태 메시지 : {product_status_msg[idx]}
-    """)
+
+#제품 전체 점검
+def view_all_products():
+    print()
+    print("="*40)
+    print("전체 제품 보고서")
+    print("="*40)
+
+
+    for i in range(len(total_inventory_data)):
+        print(f"""
+              [{i+1}번 제품] : {total_inventory_data[i][0]}
+              - 기초 재고량 : {total_inventory_data[i][1]}개 | 오늘 판매량 : {total_inventory_data[i][2]}개 | 현재 재고량 : {total_inventory_data[i][5]}개
+              - 제품 단가 : {total_inventory_data[i][3]} | 예상 마진율 : {total_inventory_data[i][4]}
+              - 발주 시급성 점수 : {total_inventory_data[i][7]:.2f}점 | 등급 : {total_inventory_data[i][8]}
+              - 상태 메시지 : {total_inventory_data[i][9]}
+              """)
+        print("-"*40)
 
 #최종 보고서 함수
-def view_final_report():
+def view_final_report_and_save():
+    names= []
+    total_remaining = 0
+    total_assets = 0
+    prices = []
+    s_grade_items = []
+
+    for p in total_inventory_data:
+        names.append(p[0])
+        total_remaining += p[5]
+        total_assets += p[6]
+        prices.append(p[3])
+        
+        if p[8] == 'S':
+            s_grade_items.append(p[0])
+
+    max_price = max(prices)
+    min_price = min(prices)
+
     print(f"""
     [파이썬 스마트 물류 센터 최종 리포트]
-    입고된 제품 목록 {",".join(product_name_data)}
-    총 재고 수량 : {sum(product_remaining_data)}개
-    총 자산 가치 : {sum(product_total_value)}
-    최고가 제품 : {max(product_cost_data)}원
-    최저가 제품 : {min(product_cost_data)}원""")
-    if len(product_low_stock) == 0:
+    입고된 제품 목록 {",".join(names)}
+    총 잔여 재고 수량 : {total_remaining}개
+    총 자산 가치 : {total_assets}
+    최고가 제품 : {max_price}원
+    최저가 제품 : {min_price}원""")
+
+    if len(s_grade_items) == 0:
         print("""품절 임박 제품(S등급)이 없습니다.""")
     else:
-        print(f"""품절 임박 제품(S등급) : {",".join(product_low_stock)}""")
+        print(f"""품절 임박 제품(S등급) : {",".join(s_grade_items)}""")
+    
+    try:
+        with open("smart_logistics_data.txt", "w", encoding = "utf-8") as file:
+            file. write("제품명, 기초재고량, 오늘 판매량, 제품단가, 예상 마진율, 현재 재고량, 총 자산가치, 위험 점수, 등급\n ")
+            for i in range(len(total_inventory_data)):
+                p = total_inventory_data[i]
+                file.write(f"{p[0]},{p[1]},{p[2]},{p[3]},{p[4]},{p[5]},{p[6]},{p[7]},{p[8]}\n")
+        print(f"\n데이터가 'smart_logistics_data.txt' 파일로 안전하게 저장되었습니다.")
+    except:
+        print("\n데이터 저장 중 오류가 발생했습니다.")
+    
     print("""파이썬 스마트 물류 시스템을 종료합니다.""")
 
 #메인 실행 루프
 while True :
     start_system()
-    choice = int(input("선택한 메뉴의 번호만 입력해주세요.(예시 : 1 / 2 / 3 ) : "))
-
+    
+    try:
+        choice = int(input("선택한 메뉴의 번호만 입력해주세요.(예시 : 1 / 2 / 3 ) : "))
+    
+    except ValueError:
+        print("\n[오류] 숫자로만 입력해주세요.")
+        continue
+    
+    
+    
     if choice == 1 :
-        insert_information()
-        calculating_information()
+        insert_and_calculate_information()
+
     
     elif choice == 2 :
         if things_count == 0:
             print("어떠한 정보도 기입하지 않았습니다. 정보를 입력한 후 선택해주세요.")
             continue
-        idx_product = list_of_products()
-        midterm_inspection(idx_product)
+        view_all_products()
+
     
     elif choice == 3 :
         if things_count == 0:
             print("어떠한 정보도 기입하지 않았습니다. 정보를 입력한 후 선택해주세요.")
             continue
-        view_final_report()
+        view_final_report_and_save()
         break
-
+    
+    else:
+        print("\n[오류] 1, 2, 3 중에서 선택해주세요!")
