@@ -17,7 +17,7 @@ def start_system():
 
     print("""
     1. 제품 정보 입력 및 계산하기
-    2. 제품 항목별 결과보기
+    2. 입력된 제품 점검하기
     3. 최종 결과 보기(종료)
     """)
 
@@ -132,7 +132,7 @@ def view_final_report_and_save():
     [파이썬 스마트 물류 센터 최종 리포트]
     입고된 제품 목록 {",".join(names)}
     총 잔여 재고 수량 : {total_remaining}개
-    총 자산 가치 : {total_assets}
+    총 자산 가치 : {total_assets}원
     최고가 제품 : {max_price}원
     최저가 제품 : {min_price}원""")
 
